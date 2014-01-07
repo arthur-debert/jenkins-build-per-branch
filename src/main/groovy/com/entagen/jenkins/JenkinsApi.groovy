@@ -44,8 +44,17 @@ class JenkinsApi {
     public void addJenkinsAuth(String jenkinsAuthUsername, String jenkinsAuthAPIToken) {
         println "use jenkins own auth db"
         hasJenkinsDBAuth = true
-        this.restClient.client.setCredentials(new UsernamePasswordCredentials( jenkinsAuthUsername, jenkinsAuthAPIToken ));
-        this.restClient.client.setAuthScope = new AuthScope( this.jenkinsServerUrl, 443, "realm");
+
+        this.restClient.client.userTokenHandler
+        this.requestInterceptor = new HttpRequestInterceptor() {
+            void process(HttpRequest httpRequest, HttpContext httpContext) {
+                httpRequest.addHeader('Authorization', 'Basic ' + jenkinsAuthAPIToken.bytes.encodeBase64().toString())
+                params  = httpRequest.params
+                params.setParameter('token', jenkinsAuthAPIToken)
+                httpRequest.params = params
+            }
+        }
+        this.restClient.client.addRequestInterceptor(this.requestInterceptor)
     }
 
     List<String> getJobNames(String prefix = null) {
@@ -206,13 +215,7 @@ class JenkinsApi {
             params[crumbInfo.field] = crumbInfo.crumb
         }
 
-
-
-
-
-
         HTTPBuilder http = new HTTPBuilder(jenkinsServerUrl)
-
         if (requestInterceptor) {
             http.client.addRequestInterceptor(this.requestInterceptor)
         }
