@@ -16,6 +16,8 @@ import org.apache.http.HttpRequest
 class JenkinsApi {
     String jenkinsServerUrl
     RESTClient restClient
+    String jenkinsAuthUsername
+    String jenkinsAuthAPIToken
     HttpRequestInterceptor requestInterceptor
     boolean findCrumb = true
     boolean hasBasicAuth = false
@@ -44,17 +46,8 @@ class JenkinsApi {
     public void addJenkinsAuth(String jenkinsAuthUsername, String jenkinsAuthAPIToken) {
         println "use jenkins own auth db"
         hasJenkinsDBAuth = true
-
-        this.restClient.client.userTokenHandler
-        this.requestInterceptor = new HttpRequestInterceptor() {
-            void process(HttpRequest httpRequest, HttpContext httpContext) {
-                httpRequest.addHeader('Authorization', 'Basic ' + jenkinsAuthAPIToken.bytes.encodeBase64().toString())
-                params  = httpRequest.params
-                params.setParameter('token', jenkinsAuthAPIToken)
-                httpRequest.params = params
-            }
-        }
-        this.restClient.client.addRequestInterceptor(this.requestInterceptor)
+        this.jenkinsAuthAPIToken = jenkinsAuthAPIToken
+        this.jenkinsAuthUsername = jenkinsAuthUsername
     }
 
     List<String> getJobNames(String prefix = null) {
@@ -218,6 +211,10 @@ class JenkinsApi {
         HTTPBuilder http = new HTTPBuilder(jenkinsServerUrl)
         if (requestInterceptor) {
             http.client.addRequestInterceptor(this.requestInterceptor)
+        }
+        if (this.hasJenkinsDBAuth){
+            params.putAt('token', this.jenkinsAuthAPIToken)
+            http.auth.basic(this.jenkinsAuthUsername, this.jenkinsAuthAPIToken)
         }
 
         Integer status = HttpStatus.SC_EXPECTATION_FAILED
