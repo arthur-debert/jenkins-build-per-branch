@@ -44,7 +44,7 @@ class JenkinsApi {
     public void addJenkinsAuth(String jenkinsAuthUsername, String jenkinsAuthAPIToken) {
         println "use jenkins own auth db"
         hasJenkinsDBAuth = true
-        this.restClient.client.setCredentials(new UsernamePasswordCredentials( jenkinsAuthUsername, jenkinsAuthApiToken ));
+        this.restClient.client.setCredentials(new UsernamePasswordCredentials( jenkinsAuthUsername, jenkinsAuthAPIToken ));
         this.restClient.client.setAuthScope = new AuthScope( this.jenkinsServerUrl, 443, "realm");
     }
 
