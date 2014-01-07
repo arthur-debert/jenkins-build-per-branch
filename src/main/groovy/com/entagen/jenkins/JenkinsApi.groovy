@@ -158,7 +158,8 @@ class JenkinsApi {
             println "Unknown host: $jenkinsServerUrl"
             throw ex
         } catch (HttpResponseException ex) {
-            def message = "Unexpected failure with path $jenkinsServerUrl${mapCopy.path}, HTTP Status Code: ${ex.response?.status}, full map: $mapCopy"
+            def message = "Unexpected failure with path $jenkinsServerUrl${mapCopy.path}, " +
+                    "HTTP Status Code: ${ex.response?.status}, full map: $mapCopy"
             throw new Exception(message, ex)
         }
 
