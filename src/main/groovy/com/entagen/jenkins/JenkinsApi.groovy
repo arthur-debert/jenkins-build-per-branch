@@ -1,5 +1,7 @@
 package com.entagen.jenkins
 
+import org.apache.http.auth.AuthScope
+import org.apache.http.auth.UsernamePasswordCredentials
 import groovyx.net.http.ContentType
 import groovyx.net.http.HTTPBuilder
 import groovyx.net.http.RESTClient
@@ -16,6 +18,8 @@ class JenkinsApi {
     RESTClient restClient
     HttpRequestInterceptor requestInterceptor
     boolean findCrumb = true
+    boolean hasBasicAuth = false
+    boolean hasJenkinsDBAuth = false
     def crumbInfo
 
     public void setJenkinsServerUrl(String jenkinsServerUrl) {
@@ -26,6 +30,7 @@ class JenkinsApi {
 
     public void addBasicAuth(String jenkinsServerUser, String jenkinsServerPassword) {
         println "use basic authentication"
+        hasBasicAuth = true
 
         this.requestInterceptor = new HttpRequestInterceptor() {
             void process(HttpRequest httpRequest, HttpContext httpContext) {
@@ -35,6 +40,12 @@ class JenkinsApi {
         }
 
         this.restClient.client.addRequestInterceptor(this.requestInterceptor)
+    }
+    public void addJenkinsAuth(String jenkinsAuthUsername, String jenkinsAuthAPIToken) {
+        println "use jenkins own auth db"
+        hasJenkinsDBAuth = true
+        this.restClient.client.setCredentials(new UsernamePasswordCredentials( jenkinsAuthUsername, jenkinsAuthApiToken ));
+        this.restClient.client.setAuthScope = new AuthScope( this.jenkinsServerUrl, 443, "realm");
     }
 
     List<String> getJobNames(String prefix = null) {

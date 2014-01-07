@@ -1,6 +1,5 @@
 package com.entagen.jenkins
 
-import java.util.regex.Pattern
 
 class JenkinsJobManager {
     String templateJobPrefix
@@ -11,6 +10,8 @@ class JenkinsJobManager {
     String branchNameRegex
     String jenkinsUser
     String jenkinsPassword
+    String jenkinsAuthUsername
+    String jenkinsAuthAPIToken
     
     Boolean dryRun = false
     Boolean noViews = false
@@ -77,19 +78,24 @@ class JenkinsJobManager {
         }
     }
 
-    public List<ConcreteJob> expectedJobs(List<TemplateJob> templateJobs, List<String> branchNames) {
+    public List<ConcreteJob> expectedJobs(List<TemplateJob> templateJobs,
+                                          List<String> branchNames) {
         branchNames.collect { String branchName ->
-            templateJobs.collect { TemplateJob templateJob -> templateJob.concreteJobForBranch(branchName) }
+            templateJobs.collect {
+                TemplateJob templateJob ->
+                    templateJob.concreteJobForBranch(branchName) }
         }.flatten()
     }
 
-    public List<String> templateDrivenJobNames(List<TemplateJob> templateJobs, List<String> allJobNames) {
+    public List<String> templateDrivenJobNames(List<TemplateJob> templateJobs,
+                                               List<String> allJobNames) {
         List<String> templateJobNames = templateJobs.jobName
         List<String> templateBaseJobNames = templateJobs.baseJobName
 
         // don't want actual template jobs, just the jobs that were created from the templates
         return (allJobNames - templateJobNames).findAll { String jobName ->
-            templateBaseJobNames.find { String baseJobName -> jobName.startsWith(baseJobName)}
+            templateBaseJobNames.find {
+                String baseJobName -> jobName.startsWith(baseJobName)}
         }
     }
 
@@ -150,8 +156,12 @@ class JenkinsJobManager {
             } else {
                 this.jenkinsApi = new JenkinsApi(jenkinsServerUrl: jenkinsUrl)
             }
+            if ((jenkinsUser || jenkinsPassword) && (jenkinsAuthUsername || jenkinsAuthAPIToken)){
+                  assert false
+            }
 
             if (jenkinsUser || jenkinsPassword) this.jenkinsApi.addBasicAuth(jenkinsUser, jenkinsPassword)
+            if (jenkinsAuthUsername || jenkinsAuthAPIToken) this.jenkinsApi.addJenkinsAuth(jenkinsAuthUsername, jenkinsAuthAPIToken)
         }
 
         return this.jenkinsApi
