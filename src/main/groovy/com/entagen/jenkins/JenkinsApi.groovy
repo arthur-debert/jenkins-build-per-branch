@@ -149,13 +149,14 @@ class JenkinsApi {
         Map mapCopy = map.clone() as Map
         def response
         def params = [:]
-        params['token'] = this.jenkinsAuthAPIToken
 
         assert mapCopy.path != null, "'path' is a required attribute for the GET method"
 
         try {
-            restClient.auth.basic(this.jenkinsAuthUsername, this.jenkinsAuthAPIToken);
-            response = restClient.get(path:map['path'], query:params)
+            builder = new HTTPBuilder(this.jenkinsServerUrl)
+            builder.auth.basic(this.jenkinsAuthUsername, this.jenkinsAuthAPIToken)
+            println "Setting creds"
+            response = builder.get(path:map['path'], query:params)
         } catch (HttpHostConnectException ex) {
             println "Unable to connect to host: $jenkinsServerUrl"
             throw ex
