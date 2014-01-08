@@ -148,11 +148,14 @@ class JenkinsApi {
         // get is destructive to the map, if there's an error we want the values around still
         Map mapCopy = map.clone() as Map
         def response
+        def params = [:]
+        params['token'] = this.jenkinsAuthAPIToken
 
         assert mapCopy.path != null, "'path' is a required attribute for the GET method"
 
         try {
-            response = restClient.get(map)
+            restClient.auth.basic(this.jenkinsAuthUsername, this.jenkinsAuthAPIToken);
+            response = restClient.get(path:map['path'], query:params)
         } catch (HttpHostConnectException ex) {
             println "Unable to connect to host: $jenkinsServerUrl"
             throw ex
