@@ -53,6 +53,7 @@ class JenkinsApi {
     List<String> getJobNames(String prefix = null) {
         println "getting project names from " + jenkinsServerUrl + "api/json"
         def response = get(path: 'api/json')
+        println "$response.data"
         def jobNames = response.data.jobs.name
         if (prefix) return jobNames.findAll { it.startsWith(prefix) }
         return jobNames
@@ -155,8 +156,10 @@ class JenkinsApi {
         try {
             def builder = new HTTPBuilder(this.jenkinsServerUrl)
             builder.auth.basic(this.jenkinsAuthUsername, this.jenkinsAuthAPIToken)
-            println "Setting creds"
+            println "Setting creds $jenkinsAuthUsername"
+            println "Setting creds $jenkinsAuthAPIToken"
             response = builder.get(path:map['path'], query:params)
+            println "$response.status"
         } catch (HttpHostConnectException ex) {
             println "Unable to connect to host: $jenkinsServerUrl"
             throw ex
