@@ -153,7 +153,7 @@ class JenkinsApi {
         assert mapCopy.path != null, "'path' is a required attribute for the GET method"
 
         try {
-            builder = new HTTPBuilder(this.jenkinsServerUrl)
+            def builder = new HTTPBuilder(this.jenkinsServerUrl)
             builder.auth.basic(this.jenkinsAuthUsername, this.jenkinsAuthAPIToken)
             println "Setting creds"
             response = builder.get(path:map['path'], query:params)
